@@ -2,8 +2,9 @@
 
 import {
   ArrowRight, BadgeCheck, CircleCheck, CircleX, KeyRound, Landmark, Link2, MessageCircle, ScanSearch,
-  Search, ShieldAlert, Sparkles,
+  Search, ShieldAlert, ShieldCheck, Smartphone, Sparkles,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -92,6 +93,8 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
           points={["home.verify.p1", "home.verify.p2", "home.verify.p3"]}
           cta="home.verify.cta"
           button="btn-primary"
+          image="/images/fraud-shield.jpg"
+          imageAlt="AI Scheme & Scam Forward Verifier"
         />
         <FeatureCard
           href="/schemes"
@@ -159,6 +162,55 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
         </div>
       </section>
 
+      {/* Mobile App & PWA Showcase */}
+      <section className="container-page mt-20">
+        <div className="panel relative overflow-hidden p-8 sm:p-12">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <div>
+              <span className="eyebrow"><Smartphone className="h-3.5 w-3.5 text-primary" /> Android & PWA App</span>
+              <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                Check Karo on your Mobile
+              </h2>
+              <p className="mt-3 text-base text-muted-foreground">
+                Install Check Karo directly to your home screen. Verify suspicious forwards in seconds with fast offline capability and zero ads.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-4 text-sm">
+                <div className="flex items-center gap-2 rounded-xl bg-muted px-3.5 py-2 font-medium">
+                  <ShieldCheck className="h-4 w-4 text-success" /> 100% Ad-Free & Private
+                </div>
+                <div className="flex items-center gap-2 rounded-xl bg-muted px-3.5 py-2 font-medium">
+                  <Sparkles className="h-4 w-4 text-saffron" /> Ultra-light (&lt; 2 MB)
+                </div>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/verify" className="btn-primary">
+                  <ScanSearch className="h-4 w-4" /> {t("home.verify.cta")}
+                </Link>
+                <Link href="/schemes" className="btn-ghost">
+                  <Landmark className="h-4 w-4 text-success" /> {t("home.schemes.cta")}
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card p-3 shadow-xl">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border/50">
+                <Image
+                  src="/images/fraud-shield.jpg"
+                  alt="Check Karo Anti-Fraud Mobile Security"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 380px"
+                />
+              </div>
+              <div className="p-3 text-center">
+                <p className="text-xs font-bold text-foreground">Verified Citizen Shield</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Direct verification for family & community forwards</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Assistant CTA */}
       <section className="container-page mt-20">
         <div
@@ -184,10 +236,24 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
 function FeatureCard(props: {
   href: string; icon: React.ReactNode; tint: string; title: DictKey; desc: DictKey;
   points: DictKey[]; cta: DictKey; button: string;
+  image?: string;
+  imageAlt?: string;
 }) {
   const { t } = useI18n();
   return (
-    <article className="panel panel-hover flex flex-col p-7 sm:p-8">
+    <article className="panel panel-hover flex flex-col overflow-hidden p-7 sm:p-8">
+      {props.image ? (
+        <div className="relative -mx-7 -mt-7 mb-6 h-44 overflow-hidden border-b border-border bg-muted/40 sm:-mx-8 sm:-mt-8 sm:h-48">
+          <Image
+            src={props.image}
+            alt={props.imageAlt || "Check Karo Feature"}
+            fill
+            className="object-cover transition-transform duration-500 hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/10 to-transparent" />
+        </div>
+      ) : null}
       <span className={`icon-tile h-12 w-12 ${props.tint}`}>{props.icon}</span>
       <h2 className="mt-5 text-2xl font-extrabold tracking-tight">{t(props.title)}</h2>
       <p className="mt-2 text-muted-foreground">{t(props.desc)}</p>
@@ -205,45 +271,66 @@ function FeatureCard(props: {
   );
 }
 
-/** Illustration built from UI pieces: a scam forward being flagged, and a matched scheme. */
+/** Illustration built from modern 3D hero artwork and live verification cards */
 function HeroVisual() {
   const { t } = useI18n();
   const Farmer = TAG_STYLE.farmer.icon;
   return (
-    <div className="relative mx-auto w-full max-w-sm animate-rise [animation-delay:150ms] lg:max-w-none">
-      <div className="absolute inset-6 -z-10 rounded-[3rem] bg-gradient-to-br from-primary/25 via-primary-2/20 to-saffron/25 blur-3xl" />
-      <div className="panel mx-auto max-w-[22rem] rounded-[2.2rem] p-3" style={{ boxShadow: "var(--shadow-lg)" }}>
-        <div className="rounded-[1.7rem] bg-muted p-4">
-          <div className="flex items-center gap-2 pb-3 text-xs font-semibold text-muted-foreground">
-            <span className="h-2 w-2 rounded-full bg-success" /> {t("brand.name")}
+    <div className="relative mx-auto w-full max-w-md animate-rise [animation-delay:150ms] lg:max-w-none">
+      <div className="absolute inset-0 -z-10 rounded-[3rem] bg-gradient-to-br from-primary/30 via-primary-2/20 to-saffron/25 blur-3xl opacity-80" />
+      <div className="panel relative overflow-hidden rounded-[2.2rem] p-3 shadow-2xl">
+        {/* Visual Hero Banner with 3D Artwork */}
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.7rem] border border-border/60 bg-muted">
+          <Image
+            src="/images/hero-banner.jpg"
+            alt="Check Karo Scheme Verification & Digital Public Welfare"
+            fill
+            priority
+            className="object-cover transition-transform duration-700 hover:scale-105"
+            sizes="(max-width: 1024px) 100vw, 45vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+
+          {/* Top Floating Badge */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
+            <BadgeCheck className="h-3.5 w-3.5 text-emerald-400" />
+            <span>Govt. Scheme Registry</span>
           </div>
 
-          <div className="ml-auto max-w-[85%] rounded-2xl rounded-tr-md bg-[#dcf8c6] p-3 text-[13px] leading-snug text-[#1b2a12] shadow-sm">
-            {t("home.mock.forward")}
+          {/* Bottom Floating Stats Pill */}
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between rounded-xl border border-white/15 bg-black/60 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Real-time Anti-Fraud AI</span>
+            </span>
+            <span className="font-bold text-amber-300">100% Free</span>
           </div>
+        </div>
 
-          <div className="animate-float mt-3 rounded-2xl border border-danger/30 bg-card p-3.5 shadow-md">
+        {/* Live Interactive Verification Cards below image */}
+        <div className="mt-3 space-y-2.5">
+          <div className="animate-float rounded-2xl border border-danger/30 bg-card p-3 shadow-md">
             <div className="flex items-center gap-2">
-              <CircleX className="h-5 w-5 text-danger" />
-              <span className="text-sm font-extrabold tracking-wide text-danger uppercase">{t("verify.result.wrong")}</span>
-              <span className="ml-auto text-xs font-semibold text-muted-foreground">94%</span>
-            </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-              <div className="h-full w-[94%] rounded-full bg-danger" />
+              <CircleX className="h-4 w-4 shrink-0 text-danger" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold text-danger uppercase">{t("verify.result.wrong")}</p>
+                <p className="truncate text-[11px] text-muted-foreground">{t("home.mock.forward")}</p>
+              </div>
+              <span className="rounded-md bg-danger/10 px-1.5 py-0.5 text-[11px] font-extrabold text-danger">94% fake</span>
             </div>
           </div>
 
-          <div className="animate-float mt-3 rounded-2xl border border-success/30 bg-card p-3.5 shadow-md [animation-delay:1.5s]">
-            <div className="flex items-center gap-3">
-              <span className={`icon-tile h-10 w-10 ${TAG_STYLE.farmer.tint}`}><Farmer className="h-5 w-5" /></span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold">PM-KISAN</p>
-                <p className="text-xs text-muted-foreground">{t("home.mock.benefit")}</p>
+          <div className="animate-float rounded-2xl border border-success/30 bg-card p-3 shadow-md [animation-delay:1.5s]">
+            <div className="flex items-center gap-2.5">
+              <span className={`icon-tile h-8 w-8 ${TAG_STYLE.farmer.tint}`}><Farmer className="h-4 w-4" /></span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold">PM-KISAN Samman Nidhi</p>
+                <p className="truncate text-[11px] text-muted-foreground">{t("home.mock.benefit")}</p>
               </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-semibold text-success shrink-0">
+                <CircleCheck className="h-3 w-3" /> {t("home.mock.eligible")}
+              </span>
             </div>
-            <p className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-success-soft px-2.5 py-1 text-xs font-semibold text-success">
-              <CircleCheck className="h-3.5 w-3.5" /> {t("home.mock.eligible")}
-            </p>
           </div>
         </div>
       </div>

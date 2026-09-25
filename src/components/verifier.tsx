@@ -2,8 +2,9 @@
 
 import {
   CalendarDays, CircleAlert, CircleCheck, CircleHelp, CircleX, ExternalLink as ExternalIcon, FileSearch, FileText,
-  Lightbulb, Link2, LoaderCircle, Quote, ScanSearch, ScrollText, Type, UploadCloud,
+  Lightbulb, Link2, LoaderCircle, Quote, ScanSearch, ScrollText, ShieldCheck, Type, UploadCloud,
 } from "lucide-react";
+import Image from "next/image";
 import { useRef, useState } from "react";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { VerdictResult } from "@/lib/verify";
@@ -79,6 +80,33 @@ export function Verifier() {
 
   return (
     <section className="container-page max-w-3xl animate-rise [animation-delay:80ms]">
+      {/* Visual Trust Banner */}
+      <div className="panel mb-6 overflow-hidden border-primary/20 bg-gradient-to-r from-primary-soft/60 via-card to-saffron-soft/40 p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-center gap-5">
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-border/80 shadow-md">
+            <Image
+              src="/images/fraud-shield.jpg"
+              alt="Cybersecurity Shield Verification"
+              fill
+              className="object-cover"
+              sizes="96px"
+            />
+          </div>
+          <div className="min-w-0 text-center sm:text-left">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Multi-Source Fact Checking</span>
+            </div>
+            <h2 className="mt-1.5 text-base font-extrabold sm:text-lg">
+              Anti-Scam & Welfare Verification Engine
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+              Cross-references viral WhatsApp forwards, fake subsidy URLs, and screenshots against the official Government of India registry and PIB Fact Check.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="panel p-5 sm:p-8">
         <div className="seg grid w-full grid-cols-3" role="tablist">
           {TABS.map(({ mode: m, icon: Icon }) => (
