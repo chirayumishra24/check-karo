@@ -11,6 +11,8 @@
     "emulators": "firebase emulators:start --only firestore --project check-karo-demo",
     "deploy:rules": "firebase deploy --only firestore:rules",
     "deploy:web": "firebase deploy --only apphosting",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy": "firebase deploy",
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
     "cap:ios": "cap open ios"
