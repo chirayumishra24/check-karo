@@ -105,6 +105,8 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
           points={["home.schemes.p1", "home.schemes.p2", "home.schemes.p3"]}
           cta="home.schemes.cta"
           button="btn-saffron"
+          image="/images/schemes-banner.jpg"
+          imageAlt="Discover Government Schemes & Subsidies"
         />
       </section>
 
