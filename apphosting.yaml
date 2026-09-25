@@ -1,0 +1,24 @@
+# Firebase App Hosting settings (Cloud Run under the hood).
+# https://firebase.google.com/docs/app-hosting/configure
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 40
+  cpu: 1
+  memoryMiB: 1024
+
+env:
+  # Create once with:  npx firebase apphosting:secrets:set ANTHROPIC_API_KEY
+  - variable: ANTHROPIC_API_KEY
+    secret: ANTHROPIC_API_KEY
+    availability:
+      - RUNTIME
+  - variable: ANTHROPIC_MODEL
+    value: claude-opus-5
+    availability:
+      - RUNTIME
+  # How long (hours) an AI scheme search is reused before it may run again.
+  - variable: DISCOVERY_TTL_HOURS
+    value: "72"
+    availability:
+      - RUNTIME

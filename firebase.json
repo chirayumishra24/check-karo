@@ -1,0 +1,16 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "apphosting": {
+    "backendId": "check-karo",
+    "rootDir": ".",
+    "ignore": ["node_modules", ".git", "android", "ios", "resources", ".next", "firebase-debug.log"]
+  },
+  "emulators": {
+    "firestore": { "port": 8080 },
+    "ui": { "enabled": true, "port": 4000 },
+    "singleProjectMode": true
+  }
+}
