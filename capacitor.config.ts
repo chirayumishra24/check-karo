@@ -5,7 +5,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // App Hosting URL before `npx cap sync`. External links (scheme websites,
 // sources) open in the in-app browser via @capacitor/browser; see
 // src/lib/open-link.ts.
-const serverUrl = process.env.CAP_SERVER_URL || "https://check-karo--check-karo-demo.asia-east1.hosted.app";
+const serverUrl = process.env.CAP_SERVER_URL || "https://check-karo--ideathon-projects.us-central1.hosted.app";
 
 const config: CapacitorConfig = {
   appId: "in.checkkaro.app",
