@@ -8,14 +8,10 @@ runConfig:
   memoryMiB: 1024
 
 env:
-  # AI features (Verify, Assistant, AI scheme discovery) need a Gemini API key
-  # (https://aistudio.google.com/apikey). Create the secret once, then uncomment
-  # these lines and redeploy:
-  #   npx firebase apphosting:secrets:set GEMINI_API_KEY --project ideathon-projects
-  # - variable: GEMINI_API_KEY
-  #   secret: GEMINI_API_KEY
-  #   availability:
-  #     - RUNTIME
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+    availability:
+      - RUNTIME
   # gemini-2.5-flash is only served to projects that used it before; otherwise
   # the app switches to GEMINI_FALLBACK_MODEL automatically.
   - variable: GEMINI_MODEL
@@ -31,3 +27,4 @@ env:
     value: "72"
     availability:
       - RUNTIME
+
