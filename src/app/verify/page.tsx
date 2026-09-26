@@ -12,6 +12,7 @@ export default function VerifyPage() {
   return (
     <>
       <PageHeader
+        narrow
         eyebrow="verify.eyebrow"
         icon={<ScanSearch className="h-3.5 w-3.5" />}
         title="verify.title"

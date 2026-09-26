@@ -44,7 +44,10 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border">
-        <p className="container-page py-5 text-xs text-muted-foreground">{t("footer.copyright", { y: new Date().getFullYear() })}</p>
+        <div className="container-page flex flex-col gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+          <p className="max-w-3xl leading-relaxed">{t("footer.disclaimer")}</p>
+          <p className="shrink-0">{t("footer.copyright", { y: new Date().getFullYear() })}</p>
+        </div>
       </div>
     </footer>
   );

@@ -24,6 +24,8 @@ type AiState =
   | { kind: "error" };
 
 const PROFILE_KEY = "checkkaro.profile";
+/** Schemes shown per page; "Show more" adds another page. */
+const PAGE = 12;
 
 export function SchemeFinder() {
   const { t, lang } = useI18n();
@@ -38,6 +40,7 @@ export function SchemeFinder() {
     return tag && (TAGS as readonly string[]).includes(tag) ? [tag] : [];
   });
   const [sort, setSort] = useState<SortKey>("popular");
+  const [limit, setLimit] = useState(PAGE);
   const [schemes, setSchemes] = useState<Scheme[] | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [ai, setAi] = useState<AiState>({ kind: "idle" });
@@ -123,6 +126,7 @@ export function SchemeFinder() {
   }, [load, discover, initialQ]);
 
   const runSearch = (p: Profile | null, query: string) => {
+    setLimit(PAGE);
     setNewIds(new Set());
     setSchemes(null);
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -291,7 +295,7 @@ export function SchemeFinder() {
                   key={tag}
                   type="button"
                   aria-pressed={on}
-                  onClick={() => setTags(on ? tags.filter((x) => x !== tag) : [...tags, tag])}
+                  onClick={() => { setLimit(PAGE); setTags(on ? tags.filter((x) => x !== tag) : [...tags, tag]); }}
                   className={`${on ? "chip-on" : "chip"} shrink-0`}
                 >
                   {Icon ? <Icon className="h-3.5 w-3.5" /> : null}
@@ -340,9 +344,21 @@ export function SchemeFinder() {
             <p className="mt-3 max-w-sm text-sm text-muted-foreground">{t("schemes.none")}</p>
           </div>
         ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {visible.map((s) => <SchemeCard key={s.id} scheme={s} isNew={newIds.has(s.id)} />)}
-          </div>
+          <>
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              {visible.slice(0, limit).map((s) => <SchemeCard key={s.id} scheme={s} isNew={newIds.has(s.id)} />)}
+            </div>
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <p className="text-xs font-medium text-muted-foreground">
+                {t("schemes.showing", { shown: Math.min(limit, visible.length), total: visible.length })}
+              </p>
+              {visible.length > limit ? (
+                <button type="button" onClick={() => setLimit((n) => n + PAGE)} className="btn-ghost px-8">
+                  {t("schemes.more")}
+                </button>
+              ) : null}
+            </div>
+          </>
         )}
       </section>
     </>

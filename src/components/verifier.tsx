@@ -87,7 +87,7 @@ export function Verifier() {
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-border/80 shadow-md">
             <Image
               src="/images/fraud-shield.jpg"
-              alt="Cybersecurity Shield Verification"
+              alt=""
               fill
               className="object-cover"
               sizes="96px"
@@ -96,14 +96,10 @@ export function Verifier() {
           <div className="min-w-0 text-center sm:text-left">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span>Multi-Source Fact Checking</span>
+              <span>{t("verify.engine.badge")}</span>
             </div>
-            <h2 className="mt-1.5 text-base font-extrabold sm:text-lg">
-              Anti-Scam & Welfare Verification Engine
-            </h2>
-            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-              Cross-references viral WhatsApp forwards, fake subsidy URLs, and screenshots against the official Government of India registry and PIB Fact Check.
-            </p>
+            <h2 className="mt-1.5 text-base font-extrabold sm:text-lg">{t("verify.engine.title")}</h2>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{t("verify.engine.body")}</p>
           </div>
         </div>
       </div>

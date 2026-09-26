@@ -289,6 +289,26 @@ const en = {
   "app.shield.title": "Verified Citizen Shield",
   "app.shield.body": "Direct verification for family and community forwards",
   "footer.app": "Android app",
+  "footer.disclaimer": "Check Karo is an independent public-interest project. It is not a government website and is not affiliated with the Government of India. Always apply on official portals.",
+
+  "verify.engine.badge": "How we check",
+  "verify.engine.title": "Scam and misinformation checker",
+  "verify.engine.body": "Compares forwards, links and screenshots with official government websites and trusted fact-checkers, then explains the result in simple words.",
+
+  "home.trust.title": "Checked against public sources such as",
+  "home.trust.pib": "PIB Fact Check",
+  "home.trust.myscheme": "myScheme portal",
+  "home.trust.indiagov": "india.gov.in",
+  "home.trust.states": "State government portals",
+  "home.trust.news": "Established news outlets",
+  "home.mock.sources": "Checked against 5 sources",
+  "home.mock.found": "{n} schemes match you",
+  "home.mock.new": "New",
+  "home.section.tools": "What you can do",
+  "home.section.safety": "Stay safe",
+
+  "schemes.more": "Show more schemes",
+  "schemes.showing": "Showing {shown} of {total}",
 
   "common.loading": "Loading…",
   "common.retry": "Try again",
@@ -590,6 +610,26 @@ const hi: Dict = {
   "app.shield.title": "नागरिक सुरक्षा कवच",
   "app.shield.body": "परिवार और समुदाय के फॉरवर्ड की सीधी जाँच",
   "footer.app": "एंड्रॉइड ऐप",
+  "footer.disclaimer": "चेक करो एक स्वतंत्र जनहित परियोजना है। यह सरकारी वेबसाइट नहीं है और भारत सरकार से संबद्ध नहीं है। आवेदन हमेशा आधिकारिक पोर्टल पर ही करें।",
+
+  "verify.engine.badge": "हम कैसे जाँचते हैं",
+  "verify.engine.title": "धोखा और गलत जानकारी जाँचने वाला",
+  "verify.engine.body": "फॉरवर्ड, लिंक और स्क्रीनशॉट की तुलना आधिकारिक सरकारी वेबसाइटों और भरोसेमंद फ़ैक्ट-चेकर्स से करता है, और नतीजा आसान शब्दों में समझाता है।",
+
+  "home.trust.title": "इन जैसे सार्वजनिक स्रोतों से मिलान",
+  "home.trust.pib": "PIB फ़ैक्ट चेक",
+  "home.trust.myscheme": "मायस्कीम पोर्टल",
+  "home.trust.indiagov": "india.gov.in",
+  "home.trust.states": "राज्य सरकार के पोर्टल",
+  "home.trust.news": "प्रतिष्ठित समाचार संस्थान",
+  "home.mock.sources": "5 स्रोतों से मिलान किया गया",
+  "home.mock.found": "आपके लिए {n} योजनाएँ",
+  "home.mock.new": "नई",
+  "home.section.tools": "आप क्या कर सकते हैं",
+  "home.section.safety": "सुरक्षित रहें",
+
+  "schemes.more": "और योजनाएँ दिखाएँ",
+  "schemes.showing": "{total} में से {shown} दिखाई जा रही हैं",
 
   "common.loading": "लोड हो रहा है…",
   "common.retry": "फिर कोशिश करें",

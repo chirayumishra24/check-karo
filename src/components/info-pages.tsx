@@ -36,7 +36,7 @@ export function Faq() {
   const items = [1, 2, 3, 4, 5, 6].map((n) => ({ q: t(`faq.q${n}` as DictKey), a: t(`faq.a${n}` as DictKey) }));
   return (
     <>
-      <PageHeader eyebrow="nav.faq" icon={<CircleHelp className="h-3.5 w-3.5" />} title="faq.title" />
+      <PageHeader narrow eyebrow="nav.faq" icon={<CircleHelp className="h-3.5 w-3.5" />} title="faq.title" />
       <section className="container-page max-w-3xl space-y-3">
         {items.map((it, i) => {
           const on = open === i;
