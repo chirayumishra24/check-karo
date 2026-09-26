@@ -2,6 +2,7 @@
 
 import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { APK_URL } from "./app-download";
 import { Logo } from "./header";
 import { useI18n } from "./providers";
 
@@ -10,7 +11,7 @@ export function Footer() {
   const links = [
     ["/schemes", "nav.schemes"], ["/verify", "nav.verify"], ["/assistant", "nav.assistant"],
     ["/about", "nav.about"], ["/faq", "nav.faq"], ["/contact", "nav.contact"],
-    ["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/downloads/check-karo.apk", "footer.app"],
+    ["/privacy", "footer.privacy"], ["/terms", "footer.terms"], [APK_URL, "footer.app"],
   ] as const;
 
   return (
@@ -34,7 +35,7 @@ export function Footer() {
             {links.map(([href, key]) =>
               href.endsWith(".apk") ? (
                 // A file, not a page: plain link so the browser downloads it.
-                <a key={href} href={href} download className="text-muted-foreground hover:text-foreground">{t(key)}</a>
+                <a key={href} href={href} className="text-muted-foreground hover:text-foreground">{t(key)}</a>
               ) : (
                 <Link key={href} href={href} className="text-muted-foreground hover:text-foreground">{t(key)}</Link>
               ),

@@ -5,8 +5,11 @@ import { useSyncExternalStore } from "react";
 import { isNativeApp } from "@/lib/open-link";
 import { useI18n } from "./providers";
 
-/** Served from public/downloads; refreshed by `npm run build:apk`. */
-export const APK_URL = "/downloads/check-karo.apk";
+/**
+ * Served as a static file by the Firebase Hosting site (hosting-site/downloads),
+ * which is published by `npm run build:apk` + `npm run deploy:hosting`.
+ */
+export const APK_URL = "https://check-karo-app.web.app/downloads/check-karo.apk";
 export const APK_SIZE_MB = 5;
 
 const noSubscribe = () => () => {};
@@ -21,7 +24,7 @@ export function AppDownload() {
   if (useInApp()) return null;
   return (
     <div className="mt-8">
-      <a href={APK_URL} download="check-karo.apk" className="btn-primary px-6 py-4 text-base">
+      <a href={APK_URL} className="btn-primary px-6 py-4 text-base">
         <Download className="h-5 w-5" /> {t("app.download")}
       </a>
       <p className="mt-6 label">{t("app.steps.title")}</p>
