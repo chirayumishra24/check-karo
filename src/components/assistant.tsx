@@ -3,10 +3,22 @@
 import { Bot, GraduationCap, MessageCircle, PiggyBank, Plus, Send, ShieldAlert, Sparkles, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { DictKey } from "@/lib/i18n/dictionaries";
+import { ExternalLink } from "./external-link";
 import { Markdown } from "./markdown";
+import { SearchSuggestions } from "./search-suggestions";
 import { useI18n } from "./providers";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Source = { name: string; url: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  /** Pages Google Search used for this answer, and Google's required suggestions snippet. */
+  sources?: Source[];
+  suggestionsHtml?: string | null;
+};
+
+/** The server appends this separator and a JSON trailer (sources) after the reply text. */
+const TRAILER = "\u001e";
 type Thread = { id: string; title: string; updatedAt: number; messages: Msg[] };
 
 const STORE = "checkkaro.chats";
@@ -78,10 +90,18 @@ export function Assistant() {
         const { done, value } = await reader.read();
         if (done) break;
         reply += dec.decode(value, { stream: true });
-        thread = { ...thread, messages: [...history, { role: "assistant", content: reply }] };
+        thread = { ...thread, messages: [...history, { role: "assistant", content: reply.split(TRAILER)[0] }] };
         setCurrent(thread);
       }
-      if (!reply.trim()) throw new Error();
+      const [text, trailer] = reply.split(TRAILER);
+      if (!text.trim()) throw new Error();
+      let meta: { sources?: Source[]; suggestionsHtml?: string | null } = {};
+      try { meta = trailer ? JSON.parse(trailer) : {}; } catch { /* reply without sources */ }
+      thread = {
+        ...thread,
+        messages: [...history, { role: "assistant", content: text, sources: meta.sources, suggestionsHtml: meta.suggestionsHtml }],
+      };
+      setCurrent(thread);
       persist(thread);
     } catch {
       setError(t("chat.error"));
@@ -206,7 +226,17 @@ export function Assistant() {
                   </span>
                   <div className="max-w-[85%] rounded-3xl rounded-tl-lg border border-border bg-card px-4 py-3 text-[15px] leading-relaxed shadow-sm">
                     {m.content ? (
-                      <Markdown text={m.content} />
+                      <>
+                        <Markdown text={m.content} />
+                        {m.sources?.length ? (
+                          <div className="mt-3 flex flex-wrap gap-1.5 border-t border-border pt-3">
+                            {m.sources.map((src) => (
+                              <ExternalLink key={src.url} href={src.url} className="chip py-1 text-[11px]">{src.name}</ExternalLink>
+                            ))}
+                          </div>
+                        ) : null}
+                        <SearchSuggestions html={m.suggestionsHtml} />
+                      </>
                     ) : (
                       <span className="flex items-center gap-1.5 py-1 text-muted-foreground" aria-label={t("chat.thinking")}>
                         <span className="h-2 w-2 animate-bounce rounded-full bg-current" />

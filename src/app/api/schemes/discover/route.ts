@@ -1,5 +1,6 @@
 import { aiConfigured, AiError } from "@/lib/ai";
-import { discoverSchemes, discoveryKey } from "@/lib/discovery";
+import { discoverSchemes } from "@/lib/discovery";
+import { discoveryKey } from "@/lib/discovery-key";
 import { bad, rateLimited, SearchSchema } from "@/lib/http";
 import { isEmptyProfile } from "@/lib/schemes";
 import { claimDiscovery, finishDiscovery, getDiscovery } from "@/lib/store";
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
   const q = parsed.data.q.trim();
   if (!profile && q.length < 3) return Response.json({ status: "skipped" });
 
-  const key = discoveryKey(profile, q);
+  const key = await discoveryKey(profile, q);
   const claim = await claimDiscovery(key, { profile, q });
   if (claim !== "claimed") return Response.json({ key, ...claim });
 

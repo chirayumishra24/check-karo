@@ -10,7 +10,7 @@ export function Footer() {
   const links = [
     ["/schemes", "nav.schemes"], ["/verify", "nav.verify"], ["/assistant", "nav.assistant"],
     ["/about", "nav.about"], ["/faq", "nav.faq"], ["/contact", "nav.contact"],
-    ["/privacy", "footer.privacy"], ["/terms", "footer.terms"],
+    ["/privacy", "footer.privacy"], ["/terms", "footer.terms"], ["/downloads/check-karo.apk", "footer.app"],
   ] as const;
 
   return (
@@ -31,9 +31,14 @@ export function Footer() {
         <div>
           <p className="label uppercase">{t("footer.links")}</p>
           <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            {links.map(([href, key]) => (
-              <Link key={href} href={href} className="text-muted-foreground hover:text-foreground">{t(key)}</Link>
-            ))}
+            {links.map(([href, key]) =>
+              href.endsWith(".apk") ? (
+                // A file, not a page: plain link so the browser downloads it.
+                <a key={href} href={href} download className="text-muted-foreground hover:text-foreground">{t(key)}</a>
+              ) : (
+                <Link key={href} href={href} className="text-muted-foreground hover:text-foreground">{t(key)}</Link>
+              ),
+            )}
           </div>
         </div>
       </div>

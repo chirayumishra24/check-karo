@@ -9,6 +9,7 @@ import { useRef, useState } from "react";
 import type { DictKey } from "@/lib/i18n/dictionaries";
 import type { VerdictResult } from "@/lib/verify";
 import { ExternalLink } from "./external-link";
+import { SearchSuggestions } from "./search-suggestions";
 import { useI18n } from "./providers";
 
 type Mode = "text" | "url" | "file";
@@ -266,6 +267,12 @@ function VerdictCard({ result }: { result: VerdictResult }) {
         <div className="mx-6 mb-6 rounded-2xl bg-muted p-4 sm:mx-7 sm:mb-7">
           <p className="label flex items-center gap-1.5"><Quote className="h-3.5 w-3.5" /> {t("verify.result.extracted")}</p>
           <p className="mt-1.5 text-sm whitespace-pre-wrap">{result.extracted}</p>
+        </div>
+      ) : null}
+
+      {result.suggestionsHtml ? (
+        <div className="mx-6 mb-6 sm:mx-7 sm:mb-7">
+          <SearchSuggestions html={result.suggestionsHtml} />
         </div>
       ) : null}
     </div>

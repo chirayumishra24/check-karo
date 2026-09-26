@@ -9,6 +9,7 @@ import {
   AREAS, CATEGORIES, EDUCATIONS, GENDERS, GROUPS, INCOMES, OCCUPATIONS, STATES, TAGS,
 } from "@/lib/constants";
 import type { DictKey } from "@/lib/i18n/dictionaries";
+import { discoveryKey } from "@/lib/discovery-key";
 import { EMPTY_PROFILE, isEmptyProfile, sortSchemes, type Profile, type Scheme, type SortKey } from "@/lib/schemes";
 import { TAG_STYLE } from "./icons";
 import { SchemeCard, TagLabel } from "./scheme-card";
@@ -76,22 +77,31 @@ export function SchemeFinder() {
       else setAi({ kind: "error" });
     };
 
+    // Waits for a search that is running on the server (ours or someone else's).
+    const pollFor = async (key: string) => {
+      let misses = 0;
+      for (let i = 0; i < 75 && seq === searchSeq.current; i++) {
+        await new Promise((r) => setTimeout(r, 4000));
+        const poll = await fetch(`/api/schemes/discover?key=${key}`).then((r) => r.json()).catch(() => null);
+        if (!poll?.status) {
+          if (++misses > 5) break; // the search never started
+          continue;
+        }
+        if (poll.status !== "running") return finish(poll.status, poll.added ?? []);
+      }
+      return finish("error", []);
+    };
+
     try {
-      const res = await fetch("/api/schemes/discover", {
+      const key = await discoveryKey(p, query);
+      // Firebase Hosting cuts proxied requests off after 60 s while the search
+      // keeps running on the server, so a failed or non-JSON reply means "poll".
+      const data = await fetch("/api/schemes/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ profile: p, q: query, tags: [] }),
-      });
-      const data = await res.json();
-      if (data.status === "running" && data.key) {
-        // Someone else started the same search; wait for it.
-        for (let i = 0; i < 75 && seq === searchSeq.current; i++) {
-          await new Promise((r) => setTimeout(r, 4000));
-          const poll = await fetch(`/api/schemes/discover?key=${data.key}`).then((r) => r.json());
-          if (poll.status !== "running") return finish(poll.status, poll.added ?? []);
-        }
-        return finish("error", []);
-      }
+      }).then((r) => r.json()).catch(() => null);
+      if (!data || data.status === "running") return pollFor(data?.key ?? key);
       if (data.status === "done" && data.startedAt && seq === searchSeq.current) {
         setAi({ kind: "cached" }); // an earlier identical search already ran
         return;

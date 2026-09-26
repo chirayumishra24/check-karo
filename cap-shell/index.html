@@ -87,9 +87,26 @@
         transform: scale(0.98);
         opacity: 0.9;
       }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--muted);
+        margin-bottom: 16px;
+      }
+      .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--saffron); animation: pulse 1.5s infinite; }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.15); }
+      }
     </style>
   </head>
   <body>
+    <!-- Shown by Capacitor (server.errorPath) when the live site cannot load, e.g. no internet. -->
     <div class="container">
       <div class="icon-box">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -99,13 +116,23 @@
       </div>
       <h1 class="title">Check Karo</h1>
       <p class="subtitle">पहले चेक करो, फिर शेयर करो</p>
+      <div class="status-pill"><span class="dot"></span><span id="status">Offline · ऑफ़लाइन</span></div>
       <p class="desc">
-        No internet connection detected.<br />
-        इंटरनेट कनेक्शन नहीं मिल रहा है। कृपया नेटवर्क जांचें।
+        No internet connection. Connect to Wi-Fi or mobile data and try again.<br />
+        इंटरनेट कनेक्शन नहीं है। वाई-फ़ाई या मोबाइल डेटा चालू करके फिर कोशिश करें।
       </p>
-      <button class="btn" onclick="location.reload()">
-        Retry / फिर से कोशिश करें
-      </button>
+      <button class="btn" id="retry">Retry · फिर कोशिश करें</button>
     </div>
+    <script>
+      // Keep in sync with server.url in capacitor.config.ts.
+      var APP_URL = "https://check-karo--ideathon-projects.us-central1.hosted.app";
+      function retry() {
+        document.getElementById("status").textContent = "Connecting… · जुड़ रहा है…";
+        window.location.href = APP_URL;
+      }
+      document.getElementById("retry").addEventListener("click", retry);
+      // Reconnect by itself as soon as the phone is back online.
+      window.addEventListener("online", retry);
+    </script>
   </body>
 </html>

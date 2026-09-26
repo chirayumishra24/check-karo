@@ -1,10 +1,13 @@
-import type Anthropic from "@anthropic-ai/sdk";
+import { FinishReason, ThinkingLevel, type Candidate, type Content } from "@google/genai";
 import { z } from "zod";
-import { aiConfigured, anthropic, FALLBACK, LANGUAGE_NAMES, MODEL, WEB_SEARCH } from "@/lib/ai";
+import { aiConfigured, gemini, groundingOf, LANGUAGE_NAMES, thinkingFor, withModel } from "@/lib/ai";
 import { bad, rateLimited } from "@/lib/http";
 import { findSchemes } from "@/lib/store";
 
 export const maxDuration = 300;
+
+/** Separates the streamed reply from the trailing JSON with sources (ASCII record separator). */
+const TRAILER = "\u001e";
 
 const Body = z.object({
   lang: z.string().max(5).default("en"),
@@ -18,39 +21,27 @@ const SYSTEM = `You are the Check Karo assistant, a free helper for people in In
 1. Spotting misinformation and scams in forwards, links and messages.
 2. Finding government schemes and benefits a person may qualify for, and how to apply.
 
-Use search_saved_schemes first for scheme questions; those schemes are shown in the app, and you can link them as /schemes/<id>. Use web search for anything current or not in the saved list, and prefer official .gov.in sources.
+Schemes from the Check Karo library that match the question are listed below; prefer them and link each as /schemes/<id>. Use Google Search for anything current or not in that list, and prefer official .gov.in sources.
 
 Keep answers short, warm and practical, with simple words and short bullet lists. Never ask for or accept OTPs, Aadhaar numbers, bank or card details. Remind people that government schemes never charge a fee to "register" through WhatsApp links. If you are not sure, say so and point to the official source.`;
 
-const SEARCH_TOOL: Anthropic.Beta.BetaTool = {
-  name: "search_saved_schemes",
-  description:
-    "Search the Check Karo scheme database by keywords (scheme name, state, or topic such as farmer, pension, scholarship). Returns up to 8 schemes with id, name, benefits, eligibility and official URL.",
-  input_schema: {
-    type: "object",
-    properties: { query: { type: "string", description: "Keywords, e.g. 'farmer bihar' or 'pension'" } },
-    required: ["query"],
-  },
-};
-
-async function runSearchTool(input: unknown): Promise<string> {
-  const query = typeof (input as { query?: unknown })?.query === "string" ? (input as { query: string }).query : "";
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  // Match any keyword, then rank by how many matched.
+/** Saved schemes that share keywords with the question, most relevant first. */
+async function libraryContext(question: string): Promise<string> {
+  const words = question.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length > 2);
+  if (!words.length) return "(none matched)";
   const all = await findSchemes({ profile: null, q: "", tags: [] });
   const ranked = all
     .map((s) => {
-      const text = `${s.name.en} ${s.desc.en} ${s.tags.join(" ")} ${s.stateKey ?? ""}`.toLowerCase();
+      const text = `${s.name.en} ${s.name.hi} ${s.desc.en} ${s.tags.join(" ")} ${s.stateKey ?? ""}`.toLowerCase();
       return { s, score: words.filter((w) => text.includes(w)).length };
     })
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score || b.s.popularity - a.s.popularity)
-    .slice(0, 8)
-    .map(({ s }) => ({
-      id: s.id, name: s.name.en, level: s.level, state: s.stateKey,
-      benefits: s.benefits.en, eligibility: s.eligibility.en, url: s.url,
-    }));
-  return JSON.stringify(ranked.length ? ranked : { note: "No saved schemes matched; try web search." });
+    .slice(0, 6);
+  if (!ranked.length) return "(none matched)";
+  return ranked
+    .map(({ s }) => `- id: ${s.id} | ${s.name.en} | benefits: ${s.benefits.en} | who: ${s.eligibility.en} | official site: ${s.url}`)
+    .join("\n");
 }
 
 export async function POST(req: Request) {
@@ -59,66 +50,53 @@ export async function POST(req: Request) {
   if (!parsed.success) return bad("Invalid chat");
   if (rateLimited(req, "chat", 40, 60 * 60_000)) return bad("Too many messages. Please try again later.", 429);
 
-  const language = LANGUAGE_NAMES[parsed.data.lang] ?? "English";
-  const messages: Anthropic.Beta.BetaMessageParam[] = parsed.data.messages.map((m) => ({
-    role: m.role,
-    content: m.content,
+  const { messages, lang } = parsed.data;
+  const language = LANGUAGE_NAMES[lang] ?? "English";
+  const contents: Content[] = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
   }));
+  const lastQuestion = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
+  const system = `${SYSTEM}\n\nReply in ${language}.\n\n<library>\n${await libraryContext(lastQuestion)}\n</library>`;
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
       const enc = new TextEncoder();
       const send = (t: string) => controller.enqueue(enc.encode(t));
-      let wroteText = false;
+      let wrote = false;
+      let grounded: Candidate | undefined;
+      let blocked = false;
       try {
-        for (let turn = 0; turn < 6; turn++) {
-          const stream = anthropic().beta.messages.stream({
-            ...FALLBACK,
-            model: MODEL,
-            max_tokens: 16000,
-            thinking: { type: "adaptive" },
-            output_config: { effort: "medium" },
-            system: `${SYSTEM}\n\nReply in ${language}.`,
-            tools: [WEB_SEARCH(3), SEARCH_TOOL],
-            messages,
-          });
-          let turnText = false;
-          stream.on("text", (t) => {
-            if (!turnText && wroteText) send("\n\n");
-            turnText = true;
-            wroteText = true;
-            send(t);
-          });
-          const msg = await stream.finalMessage();
-
-          if (msg.stop_reason === "refusal") {
-            send(wroteText ? "\n\n" : "");
-            send("Sorry, I can't help with that request.");
-            break;
+        const stream = await withModel((model) =>
+          gemini().models.generateContentStream({
+            model,
+            contents,
+            config: {
+              systemInstruction: system,
+              tools: [{ googleSearch: {} }],
+              thinkingConfig: thinkingFor(model, ThinkingLevel.LOW),
+            },
+          }),
+        );
+        for await (const chunk of stream) {
+          const candidate = chunk.candidates?.[0];
+          if (candidate?.groundingMetadata) grounded = candidate;
+          if (candidate?.finishReason === FinishReason.SAFETY || candidate?.finishReason === FinishReason.PROHIBITED_CONTENT) {
+            blocked = true;
           }
-          messages.push({ role: "assistant", content: msg.content });
-          if (msg.stop_reason === "pause_turn") continue;
-
-          const calls = msg.content.filter(
-            (b): b is Anthropic.Beta.BetaToolUseBlock => b.type === "tool_use",
-          );
-          if (msg.stop_reason !== "tool_use" || calls.length === 0) break;
-
-          const results: Anthropic.Beta.BetaToolResultBlockParam[] = await Promise.all(
-            calls.map(async (c) => ({
-              type: "tool_result" as const,
-              tool_use_id: c.id,
-              content: c.name === SEARCH_TOOL.name ? await runSearchTool(c.input) : "Unknown tool",
-              is_error: c.name !== SEARCH_TOOL.name,
-            })),
-          );
-          messages.push({ role: "user", content: results });
+          const text = chunk.text;
+          if (text) {
+            wrote = true;
+            send(text);
+          }
         }
+        if (blocked && !wrote) send("Sorry, I can't help with that request.");
       } catch (err) {
         console.error("chat failed", err);
-        send(wroteText ? "\n\n" : "");
+        send(wrote ? "\n\n" : "");
         send("⚠️ The assistant could not finish its reply. Please try again.");
       } finally {
+        send(TRAILER + JSON.stringify(groundingOf(grounded)));
         controller.close();
       }
     },

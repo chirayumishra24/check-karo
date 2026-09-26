@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { researchAndSubmit } from "./ai";
+import { researchJson, urlResolves } from "./ai";
 import {
   AREAS, CATEGORIES, EDUCATIONS, GENDERS, GROUPS, INCOMES, OCCUPATIONS, STATES, STATE_KEYS, TAGS,
 } from "./constants";
@@ -40,13 +40,13 @@ const Submission = z.object({ schemes: z.array(FoundScheme).max(12) });
 
 const SYSTEM = `You research Indian government welfare schemes for Check Karo, a free public service that helps ordinary people find benefits they qualify for.
 
-Use web search to find schemes that are currently active, preferring official sources (myscheme.gov.in, india.gov.in, ministry and state .gov.in / .nic.in sites). Only report a scheme when you found a real official page for it; never invent schemes, amounts or links. Skip schemes that have been closed or merged.
+Use Google Search to find schemes that are currently active, preferring official sources (myscheme.gov.in, india.gov.in, ministry and state .gov.in / .nic.in sites). Only report a scheme when you found a real official page for it; never invent schemes, amounts or links. Skip schemes that have been closed or merged.
 
 Write every text field in simple language that a first-time smartphone user can follow, in both English and Hindi (Devanagari). Keep each field to one or two short sentences.
 
 For criteria, only use the allowed enum values. Leave a criteria field out when the scheme does not restrict on it; do not guess restrictions. Use groups=["women"] or genders=["female"] for women-only schemes, groups=["senior"] with a minAge for elderly schemes, groups=["disabled"] for disability schemes.
 
-When done, call submit_schemes exactly once. Submit an empty list if you found nothing new.`;
+Return an empty list if you found nothing new.`;
 
 function describeProfile(p: Profile | null): string {
   if (!p) return "No profile given.";
@@ -63,23 +63,6 @@ function describeProfile(p: Profile | null): string {
   return parts.length ? parts.join("; ") : "No profile given.";
 }
 
-/** Same search → same key, so repeated searches reuse one AI run. */
-export function discoveryKey(profile: Profile | null, q: string): string {
-  const norm = JSON.stringify({
-    p: profile ? { ...profile, age: profile.age ? ageBand(Number(profile.age)) : "", groups: [...profile.groups].sort() } : null,
-    q: q.trim().toLowerCase().replace(/\s+/g, " "),
-  });
-  return createHash("sha256").update(norm).digest("hex").slice(0, 32);
-}
-
-function ageBand(age: number): string {
-  if (age < 18) return "child";
-  if (age < 25) return "18-24";
-  if (age < 40) return "25-39";
-  if (age < 60) return "40-59";
-  return "60+";
-}
-
 export async function discoverSchemes(profile: Profile | null, q: string): Promise<string[]> {
   const known = (await getAllSchemes()).map((s) => s.name.en);
   const request = [
@@ -89,18 +72,17 @@ export async function discoverSchemes(profile: Profile | null, q: string): Promi
     known.map((n) => `- ${n}`).join("\n"),
   ].filter(Boolean).join("\n\n");
 
-  const result = await researchAndSubmit({
+  const { data: result } = await researchJson({
     system: SYSTEM,
-    content: [{ type: "text", text: request }],
-    submit: {
-      name: "submit_schemes",
-      description: "Submit the new schemes you found, with bilingual text and eligibility rules.",
-      schema: Submission,
-    },
-    searches: 6,
+    parts: [{ text: request }],
+    schema: Submission,
   });
 
-  const cleaned: NewScheme[] = result.schemes.map((s) => ({
+  // Keep only schemes whose official link actually opens.
+  const reachable = await Promise.all(result.schemes.map((s) => urlResolves(s.url)));
+  const found = result.schemes.filter((_, i) => reachable[i]);
+
+  const cleaned: NewScheme[] = found.map((s) => ({
     id: slugify(s.name.en) || createHash("sha1").update(s.url).digest("hex").slice(0, 12),
     level: s.level,
     stateKey: s.level === "state" ? s.stateKey : null,

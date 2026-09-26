@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { STATES } from "@/lib/constants";
 import type { DictKey } from "@/lib/i18n/dictionaries";
+import { AppDownload, APK_SIZE_MB } from "./app-download";
 import { TAG_STYLE, TopicIcon } from "./icons";
 import { useI18n } from "./providers";
 
@@ -26,7 +27,7 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
   return (
     <>
       {/* Hero */}
-      <section className="container-page grid items-center gap-12 pt-10 pb-6 sm:pt-16 lg:grid-cols-[1.1fr_0.9fr] lg:pt-20">
+      <section className="container-page grid grid-cols-1 items-center gap-12 pt-10 pb-6 sm:pt-16 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:pt-20">
         <div className="animate-rise">
           <span className="eyebrow"><Sparkles className="h-3.5 w-3.5" /> {t("home.badge")}</span>
           <h1 className="mt-5 text-[2.6rem] leading-[1.05] font-extrabold tracking-tight sm:text-6xl">
@@ -167,31 +168,20 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
       {/* Mobile App & PWA Showcase */}
       <section className="container-page mt-20">
         <div className="panel relative overflow-hidden p-8 sm:p-12">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
             <div>
-              <span className="eyebrow"><Smartphone className="h-3.5 w-3.5 text-primary" /> Android & PWA App</span>
-              <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">
-                Check Karo on your Mobile
-              </h2>
-              <p className="mt-3 text-base text-muted-foreground">
-                Install Check Karo directly to your home screen. Verify suspicious forwards in seconds with fast offline capability and zero ads.
-              </p>
+              <span className="eyebrow"><Smartphone className="h-3.5 w-3.5 text-primary" /> {t("app.eyebrow")}</span>
+              <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">{t("app.title")}</h2>
+              <p className="mt-3 text-base text-muted-foreground">{t("app.body")}</p>
               <div className="mt-6 flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-2 rounded-xl bg-muted px-3.5 py-2 font-medium">
-                  <ShieldCheck className="h-4 w-4 text-success" /> 100% Ad-Free & Private
+                  <ShieldCheck className="h-4 w-4 text-success" /> {t("app.chip.private")}
                 </div>
                 <div className="flex items-center gap-2 rounded-xl bg-muted px-3.5 py-2 font-medium">
-                  <Sparkles className="h-4 w-4 text-saffron" /> Ultra-light (&lt; 2 MB)
+                  <Sparkles className="h-4 w-4 text-saffron" /> {t("app.chip.size", { size: APK_SIZE_MB })}
                 </div>
               </div>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/verify" className="btn-primary">
-                  <ScanSearch className="h-4 w-4" /> {t("home.verify.cta")}
-                </Link>
-                <Link href="/schemes" className="btn-ghost">
-                  <Landmark className="h-4 w-4 text-success" /> {t("home.schemes.cta")}
-                </Link>
-              </div>
+              <AppDownload />
             </div>
 
             <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-3xl border border-border bg-card p-3 shadow-xl">
@@ -205,8 +195,8 @@ export function Home({ schemeCount }: { schemeCount: number | null }) {
                 />
               </div>
               <div className="p-3 text-center">
-                <p className="text-xs font-bold text-foreground">Verified Citizen Shield</p>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">Direct verification for family & community forwards</p>
+                <p className="text-xs font-bold text-foreground">{t("app.shield.title")}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{t("app.shield.body")}</p>
               </div>
             </div>
           </div>

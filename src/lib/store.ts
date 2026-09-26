@@ -4,14 +4,18 @@ import { SEED_SCHEMES } from "./seed-schemes";
 import { matchesProfile, type Profile, type Scheme } from "./schemes";
 import { STATES } from "./constants";
 
-// Firestore layout
+// Firestore layout (every collection name gets PREFIX, so the app can share a
+// project database with other apps):
 //   schemes/{id}          one document per scheme (seeded + AI-discovered)
 //   discoveries/{key}     one document per AI search, used as a cache and lock
 //   contacts/{autoId}     messages from the contact form
 //   meta/seed             marks that the starter catalogue has been written
 
-const SCHEMES = "schemes";
-const DISCOVERIES = "discoveries";
+const PREFIX = process.env.FIRESTORE_PREFIX ?? "checkkaro_";
+const SCHEMES = `${PREFIX}schemes`;
+const DISCOVERIES = `${PREFIX}discoveries`;
+const CONTACTS = `${PREFIX}contacts`;
+const META = `${PREFIX}meta`;
 const CACHE_MS = 60_000;
 
 let cache: { at: number; list: Scheme[] } | null = null;
@@ -63,7 +67,7 @@ function searchText(s: Omit<Scheme, "createdAt" | "lastVerifiedAt" | "source">):
 
 async function ensureSeeded(): Promise<void> {
   const db = firestore();
-  const marker = db.collection("meta").doc("seed");
+  const marker = db.collection(META).doc("seed");
   if ((await marker.get()).exists) return;
   const batch = db.batch();
   for (const s of SEED_SCHEMES) {
@@ -220,5 +224,5 @@ export async function finishDiscovery(key: string, result: { added: string[] } |
 // ---- Contact form -----------------------------------------------------------
 
 export async function saveContact(msg: Record<string, string>) {
-  await firestore().collection("contacts").add({ ...msg, createdAt: FieldValue.serverTimestamp() });
+  await firestore().collection(CONTACTS).add({ ...msg, createdAt: FieldValue.serverTimestamp() });
 }

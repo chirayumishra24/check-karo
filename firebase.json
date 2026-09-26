@@ -4,24 +4,40 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "source": ".",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "frameworksBackend": {
-      "region": "asia-south1"
-    }
+    "site": "check-karo-app",
+    "public": "hosting-redirect",
+    "redirects": [
+      {
+        "regex": "^/(?P<rest>.*)$",
+        "destination": "https://check-karo--ideathon-projects.us-central1.hosted.app/:rest",
+        "type": 302
+      }
+    ]
   },
   "apphosting": {
     "backendId": "check-karo",
     "rootDir": ".",
-    "ignore": ["node_modules", ".git", "android", "ios", "resources", ".next", "firebase-debug.log"]
+    "ignore": [
+      "node_modules",
+      ".git",
+      ".firebase",
+      "android",
+      "ios",
+      "resources",
+      ".next",
+      "cap-shell",
+      "*.log",
+      ".env.development.local"
+    ]
   },
   "emulators": {
-    "firestore": { "port": 8080 },
-    "ui": { "enabled": true, "port": 4000 },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
     "singleProjectMode": true
   }
 }

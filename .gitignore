@@ -47,3 +47,11 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 .firebase/
+
+# built app packages
+/dist
+*.apk
+/public/downloads/*.apk
+
+# ide
+.vscode/
